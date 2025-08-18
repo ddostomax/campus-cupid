@@ -1,25 +1,3 @@
-<!--
-Campus Cupid – Single-file website
-- Beautiful landing page with a registration form
-- Works as a static site you can host on GitHub Pages/Netlify/Vercel/Hostinger
-- Payment options:
-   (A) SIMPLE: Redirect users to a Razorpay/UPI Payment Link (no backend). You reconcile manually.
-   (B) ADVANCED: Use Razorpay Checkout with order creation + Google Apps Script webhook to store submissions in a Google Sheet and verify payment.
-
-HOW TO USE (QUICK START – SIMPLE, NO BACKEND)
-1) Create a Razorpay (or any UPI) Payment Link for ₹100 and copy the URL.
-2) In the CONFIG section below, set PAYMENT_LINK to your link.
-3) Set FORM_ENDPOINT to a Formspree endpoint (free) OR paste a Google Apps Script Web App URL that writes to a Google Sheet. For Formspree, create a form at https://formspree.io.
-4) Deploy this file as-is. Done.
-
-HOW TO USE (ADVANCED – WITH RAZORPAY CHECKOUT)
-1) Keep a tiny backend to create orders and verify signatures (recommended). You can use the Google Apps Script in the bottom of this file (commented) or any server.
-2) Replace RAZORPAY_KEY with your key_id.
-3) Replace ORDER_API with your endpoint that returns {order_id, amount}.
-4) Replace WEBHOOK_CAPTURE_URL with your webhook URL to save successful payments + form data.
-
-NOTE: The SIMPLE mode is enabled by default. Toggle MODE in CONFIG.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,11 +8,10 @@ NOTE: The SIMPLE mode is enabled by default. Toggle MODE in CONFIG.
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root{ --ring: 0 0 0 4px rgba(236,72,153,.25);} /* pink ring */
-    html,body{font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";}
+    :root{ --ring: 0 0 0 4px rgba(236,72,153,.25);} 
+    html,body{font-family: Inter, system-ui;}
     .glass{ backdrop-filter: blur(8px); background: rgba(255,255,255,.08); }
     .hero-grad{
       background: radial-gradient(1200px 600px at 10% 10%, rgba(236,72,153,.25), transparent),
@@ -47,6 +24,7 @@ NOTE: The SIMPLE mode is enabled by default. Toggle MODE in CONFIG.
   </style>
 </head>
 <body class="bg-[#0e0e16] text-white">
+
   <!-- NAV -->
   <header class="sticky top-0 z-30 bg-black/30 backdrop-blur border-b border-white/10">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -58,7 +36,9 @@ NOTE: The SIMPLE mode is enabled by default. Toggle MODE in CONFIG.
         <a href="#how" class="hover:text-white">How it works</a>
         <a href="#features" class="hover:text-white">Why us</a>
         <a href="#apply" class="hover:text-white">Apply</a>
-        <a href="#faq" class="hover:text-white">FAQ</a>
+        <a href="privacy.html" class="hover:text-white">Privacy</a>
+        <a href="terms.html" class="hover:text-white">Terms</a>
+        <a href="refund.html" class="hover:text-white">Refunds</a>
       </nav>
       <a href="#apply" class="cta rounded-2xl bg-pink-600 px-4 py-2 text-sm font-semibold shadow-lg">Get Matched</a>
     </div>
@@ -71,77 +51,9 @@ NOTE: The SIMPLE mode is enabled by default. Toggle MODE in CONFIG.
         <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
           Find your campus match in days, not months.
         </h1>
-        <p class="mt-4 text-white/80 text-lg">Verified students • Privacy-first • Smart matching across colleges. Pay ₹100, fill your vibe, and let us play Cupid.
-        </p>
+        <p class="mt-4 text-white/80 text-lg">Verified students • Privacy-first • Smart matching across colleges. Girls pay ₹49, Boys pay ₹99. </p>
         <div class="mt-6 flex gap-3">
           <a href="#apply" class="cta inline-block rounded-2xl bg-pink-600 px-5 py-3 font-semibold shadow-xl">Apply now</a>
-          <a href="#how" class="inline-block rounded-2xl border border-white/20 px-5 py-3 font-semibold hover:bg-white/5">How it works</a>
-        </div>
-        <div class="mt-6 flex items-center gap-4 text-sm text-white/70">
-          <div class="flex -space-x-2">
-            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-pink-600">A</span>
-            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-purple-600">B</span>
-            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600">C</span>
-          </div>
-          <span>2,000+ students matched last semester*</span>
-        </div>
-      </div>
-      <div class="glass card rounded-3xl p-6 border border-white/10">
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">📝</span>
-          <h3 class="text-xl font-bold">Fast Application</h3>
-        </div>
-        <p class="text-white/70 mt-2">Takes ~3 minutes. You can keep it anonymous until a mutual match.</p>
-        <ul class="mt-4 space-y-2 text-white/80 text-sm list-disc list-inside">
-          <li>College-verified profiles</li>
-          <li>Preference-based matching</li>
-          <li>Human review for edge cases</li>
-        </ul>
-        <a href="#apply" class="mt-6 block text-center rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 px-5 py-3 font-semibold">Start your form</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section id="how" class="border-b border-white/10">
-    <div class="max-w-6xl mx-auto px-4 py-16">
-      <h2 class="text-3xl font-extrabold">How it works</h2>
-      <div class="mt-8 grid md:grid-cols-3 gap-6">
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <div class="text-2xl">1️⃣</div>
-          <h3 class="mt-2 text-xl font-bold">Apply</h3>
-          <p class="text-white/70">Fill the form with your details, preferences, and vibe.</p>
-        </div>
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <div class="text-2xl">2️⃣</div>
-          <h3 class="mt-2 text-xl font-bold">Pay</h3>
-          <p class="text-white/70">Pay the ₹100 fee securely. This helps keep spam away and funds reviews.</p>
-        </div>
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <div class="text-2xl">3️⃣</div>
-          <h3 class="mt-2 text-xl font-bold">Get Matched</h3>
-          <p class="text-white/70">We match based on compatibility. If there’s a mutual yes, we connect you.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FEATURES -->
-  <section id="features" class="border-b border-white/10">
-    <div class="max-w-6xl mx-auto px-4 py-16">
-      <h2 class="text-3xl font-extrabold">What makes us different</h2>
-      <div class="mt-8 grid md:grid-cols-3 gap-6">
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <h3 class="text-xl font-bold">Verified Students</h3>
-          <p class="text-white/70">College email/ID checks to keep it authentic.</p>
-        </div>
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <h3 class="text-xl font-bold">Privacy-first</h3>
-          <p class="text-white/70">Your info isn’t shared until there’s a mutual match.</p>
-        </div>
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <h3 class="text-xl font-bold">Smart + Human Review</h3>
-          <p class="text-white/70">Preference-based pairing plus manual review for edge cases.</p>
         </div>
       </div>
     </div>
@@ -152,26 +64,27 @@ NOTE: The SIMPLE mode is enabled by default. Toggle MODE in CONFIG.
     <div class="max-w-4xl mx-auto px-4 py-16">
       <div class="glass card rounded-3xl p-6 md:p-10 border border-white/10">
         <h2 class="text-3xl font-extrabold">Apply to get matched</h2>
-        <p class="text-white/70 mt-2">Fill this quick form. You’ll be redirected to pay ₹100.</p>
+        <p class="text-white/70 mt-2">Fill this quick form. You’ll be redirected to pay ₹49 (girls) or ₹99 (boys).</p>
 
         <form id="applyForm" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
           <!-- LEFT -->
           <div class="space-y-4">
             <div>
               <label class="block text-sm text-white/80 mb-1">Full Name*</label>
-              <input name="name" required class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3" placeholder="Your name" />
+              <input name="name" required class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="Your name" />
             </div>
             <div>
               <label class="block text-sm text-white/80 mb-1">College*</label>
-              <input name="college" required class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3" placeholder="IIIT-Delhi, DTU, IGDTUW, etc." />
+              <input name="college" required class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="DU, IP, etc." />
             </div>
             <div>
-              <label class="block text-sm text-white/80 mb-1">College Email (preferred)</label>
-              <input name="email" type="email" class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3" placeholder="you@college.ac.in" />
+              <label class="block text-sm text-white/80 mb-1">College Email</label>
+              <input name="college_email" type="email" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="you@college.ac.in" />
             </div>
+            <!-- NEW personal email -->
             <div>
-              <label class="block text-sm text-white/80 mb-1">Instagram ID</label>
-              <input name="instagram" class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3" placeholder="@username" />
+              <label class="block text-sm text-white/80 mb-1">Personal Email*</label>
+              <input name="personal_email" type="email" required class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="you@gmail.com" />
             </div>
           </div>
 
@@ -179,73 +92,50 @@ NOTE: The SIMPLE mode is enabled by default. Toggle MODE in CONFIG.
           <div class="space-y-4">
             <div>
               <label class="block text-sm text-white/80 mb-1">Gender*</label>
-              <select name="gender" required class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3">
+              <select name="gender" id="gender" required class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3">
                 <option value="">Select…</option>
-                <option>Female</option>
-                <option>Male</option>
-                <option>Non-binary</option>
-                <option>Prefer not to say</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
               </select>
             </div>
             <div>
               <label class="block text-sm text-white/80 mb-1">Looking for*</label>
-              <select name="looking_for" required class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3">
+              <select name="looking_for" required class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3">
                 <option value="">Select…</option>
                 <option>Female</option>
                 <option>Male</option>
                 <option>Open to all</option>
               </select>
             </div>
+            <!-- NEW Height -->
             <div>
-              <label class="block text-sm text-white/80 mb-1">Year & Branch</label>
-              <input name="year_branch" class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3" placeholder="2nd year CSE" />
+              <label class="block text-sm text-white/80 mb-1">Height</label>
+              <input name="height" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="e.g., 5'8 or 172cm" />
             </div>
+            <!-- Fun Hinge-style Q -->
             <div>
-              <label class="block text-sm text-white/80 mb-1">Interests / Qualities</label>
-              <input name="interests" class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3" placeholder="e.g., gym, books, anime, startup, travel" />
+              <label class="block text-sm text-white/80 mb-1">Prompt: "My most controversial opinion is..."</label>
+              <input name="prompt1" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="Type your answer" />
             </div>
           </div>
 
           <div class="md:col-span-2">
-            <label class="block text-sm text-white/80 mb-1">What’s your vibe? (short bio)</label>
-            <textarea name="bio" rows="3" class="w-full ring-focus rounded-2xl bg-white/5 border border-white/15 px-4 py-3" placeholder="Funny? Introvert? Gym bro? Art kid? Describe yourself in 1–2 lines"></textarea>
+            <label class="block text-sm text-white/80 mb-1">Prompt: "Two truths and a lie about me"</label>
+            <textarea name="prompt2" rows="3" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3"></textarea>
           </div>
 
           <div class="md:col-span-2 flex items-start gap-3 text-sm text-white/80">
             <input id="consent" type="checkbox" class="mt-1" required />
-            <label for="consent">I agree to the <a href="#" class="underline">Terms</a> and <a href="#" class="underline">Privacy Policy</a>. I’m a current student and my information is accurate.</label>
+            <label for="consent">I agree to the <a href="terms.html" class="underline">Terms</a>, <a href="privacy.html" class="underline">Privacy Policy</a>, and <a href="refund.html" class="underline">Refund Policy</a>.</label>
           </div>
 
           <div class="md:col-span-2 flex flex-col sm:flex-row gap-3">
-            <button id="submitBtn" class="cta w-full sm:w-auto rounded-2xl bg-pink-600 px-6 py-3 font-semibold shadow-xl disabled:opacity-60 disabled:cursor-not-allowed">Pay ₹100 & Submit</button>
+            <button id="submitBtn" class="cta w-full sm:w-auto rounded-2xl bg-pink-600 px-6 py-3 font-semibold shadow-xl disabled:opacity-60 disabled:cursor-not-allowed">
+              Pay & Submit
+            </button>
             <p id="status" class="text-white/70 text-sm flex-1"></p>
           </div>
         </form>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section id="faq" class="border-t border-white/10">
-    <div class="max-w-6xl mx-auto px-4 py-16">
-      <h2 class="text-3xl font-extrabold">FAQ</h2>
-      <div class="mt-6 grid md:grid-cols-2 gap-6">
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <h3 class="text-lg font-bold">Is it anonymous?</h3>
-          <p class="text-white/70">Yes, we only reveal identities if there’s mutual interest.</p>
-        </div>
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <h3 class="text-lg font-bold">How long until I get matched?</h3>
-          <p class="text-white/70">Usually within 3–7 days depending on your preferences and pool size.</p>
-        </div>
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <h3 class="text-lg font-bold">Refunds?</h3>
-          <p class="text-white/70">We refund if we can’t process your application. See full policy in Terms.</p>
-        </div>
-        <div class="glass card rounded-3xl p-6 border border-white/10">
-          <h3 class="text-lg font-bold">Which colleges?</h3>
-          <p class="text-white/70">Starts with IIIT-Delhi, DTU, IGDTUW, NSUT, and Sharda—expanding soon.</p>
-        </div>
       </div>
     </div>
   </section>
@@ -254,136 +144,41 @@ NOTE: The SIMPLE mode is enabled by default. Toggle MODE in CONFIG.
     © <span id="yr"></span> Campus Cupid • Built with ❤️ in India
   </footer>
 
-  <!-- SIMPLE MODE + ADVANCED MODE LOGIC -->
   <script>
-    // ===========================
-    // CONFIG
-    // ===========================
     const CONFIG = {
-      MODE: "SIMPLE", // "SIMPLE" (no backend) or "ADVANCED" (Razorpay Checkout)
-
-      // SIMPLE MODE
-      PAYMENT_LINK: "https://rzp.io/l/YOUR_PAYMENT_LINK", // TODO: replace with your Razorpay Payment Link (₹100)
-      FORM_ENDPOINT: "https://formspree.io/f/yourformid", // TODO: replace with Formspree endpoint OR your Apps Script Web App URL
-
-      // ADVANCED MODE
-      RAZORPAY_KEY: "rzp_test_yourkeyid", // TODO: replace with your Razorpay key_id
-      ORDER_API: "/api/create-order", // TODO: replace with your backend endpoint that returns {order_id, amount}
-      WEBHOOK_CAPTURE_URL: "/api/capture-form", // TODO: endpoint to save form + payment data
+      MODE: "SIMPLE",
+      PAYMENT_LINK_FEMALE: "https://rzp.io/l/YOUR_LINK_FOR_49",
+      PAYMENT_LINK_MALE: "https://rzp.io/l/YOUR_LINK_FOR_99",
+      FORM_ENDPOINT: "https://formspree.io/f/yourformid",
     };
 
-    // UTIL: serialize form -> object
     function formToObject(form){
       const fd=new FormData(form); const obj={};
       for(const [k,v] of fd.entries()){ obj[k]=v; }
       return obj;
     }
 
-    // UTIL: POST JSON
-    async function postJSON(url, payload){
-      const res = await fetch(url, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      if(!res.ok) throw new Error('Request failed: '+res.status);
-      return res.json().catch(()=>({ok:true}));
-    }
-
-    // FOOTER YEAR
     document.getElementById('yr').textContent = new Date().getFullYear();
-
-    // SUBMIT HANDLER
     const form = document.getElementById('applyForm');
     const btn  = document.getElementById('submitBtn');
     const statusEl = document.getElementById('status');
 
     form.addEventListener('submit', (e)=> e.preventDefault());
-    btn.addEventListener('click', onSubmit);
-
-    async function onSubmit(){
-      statusEl.textContent = '';
+    btn.addEventListener('click', async ()=> {
       if(!form.reportValidity()) return;
-
       const data = formToObject(form);
-      btn.disabled = true;
-      btn.textContent = 'Processing…';
-
+      btn.disabled=true; btn.textContent='Processing…';
       try{
-        if(CONFIG.MODE === 'SIMPLE'){
-          // 1) Send form to Formspree/Apps Script
-          try{ await fetch(CONFIG.FORM_ENDPOINT, { method:'POST', headers:{'Accept':'application/json'}, body: new FormData(form) }); }catch(_){/* ignore */}
-          // 2) Open payment link in new tab
-          window.open(CONFIG.PAYMENT_LINK, '_blank');
-          statusEl.textContent = 'Form sent. Complete payment in the new tab. You will also receive a confirmation email shortly.';
-          btn.textContent = 'Resend / Pay again';
-        } else {
-          // ADVANCED: create order, launch Razorpay, then send capture
-          const order = await postJSON(CONFIG.ORDER_API, { amount: 10000, currency: 'INR', notes: { email: data.email || '', name: data.name || '' } });
-          if(!order || !order.order_id) throw new Error('Order creation failed');
-
-          const options = {
-            key: CONFIG.RAZORPAY_KEY,
-            amount: order.amount,
-            currency: 'INR',
-            name: 'Campus Cupid',
-            description: 'Application Fee',
-            order_id: order.order_id,
-            handler: async function (response){
-              // Save to DB / Sheet with payment success
-              await postJSON(CONFIG.WEBHOOK_CAPTURE_URL, { form: data, payment: response });
-              statusEl.textContent = 'Payment successful! Your application has been recorded.';
-              btn.textContent = 'Submitted ✔';
-            },
-            prefill: { name: data.name || '', email: data.email || '' },
-            theme: { color: '#ec4899' },
-          };
-          const rzp1 = new window.Razorpay(options);
-          rzp1.on('payment.failed', function (resp){ statusEl.textContent = 'Payment failed. Please try again.'; btn.textContent='Pay ₹100 & Submit'; btn.disabled=false; });
-          rzp1.open();
-        }
+        await fetch(CONFIG.FORM_ENDPOINT, { method:'POST', headers:{'Accept':'application/json'}, body:new FormData(form) });
+        let payLink = data.gender==="Female" ? CONFIG.PAYMENT_LINK_FEMALE : CONFIG.PAYMENT_LINK_MALE;
+        window.open(payLink, '_blank');
+        statusEl.textContent="Form submitted. Complete payment in the new tab.";
+        btn.textContent='Resend / Pay again';
       }catch(err){
-        console.error(err);
-        statusEl.textContent = 'Something went wrong. Please try again.';
-        btn.textContent = 'Pay ₹100 & Submit';
-        btn.disabled = false;
+        statusEl.textContent="Something went wrong.";
+        btn.disabled=false; btn.textContent="Pay & Submit";
       }
-    }
+    });
   </script>
-
-  <!-- Razorpay Checkout (only used in ADVANCED mode) -->
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
 </html>
-
-<!-- ===============================
-OPTIONAL: Google Apps Script (save form to Google Sheet)
-Steps:
-1) Create a Google Sheet with headers: timestamp, name, college, email, instagram, gender, looking_for, year_branch, interests, bio, payment_id
-2) Extensions > Apps Script. Paste this code and deploy as a Web App (Anyone with link).
-3) Copy the Web App URL and put it into CONFIG.FORM_ENDPOINT (SIMPLE) or WEBHOOK_CAPTURE_URL (ADVANCED).
-
-function doPost(e){
-  const sheetId = 'PASTE_SHEET_ID';
-  const ss = SpreadsheetApp.openById(sheetId);
-  const sh = ss.getSheets()[0];
-  const params = e.parameter;
-  const now = new Date();
-
-  // If coming from ADVANCED (capture), payload is JSON
-  try{
-    const json = JSON.parse(e.postData.contents);
-    if(json && json.form && json.payment){
-      const f = json.form; const p = json.payment;
-      sh.appendRow([now, f.name, f.college, f.email, f.instagram, f.gender, f.looking_for, f.year_branch, f.interests, f.bio, p.razorpay_payment_id || '']);
-      return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
-    }
-  }catch(_){ /* not JSON, continue */ }
-
-  // SIMPLE mode: receive FormData (urlencoded/multipart)
-  sh.appendRow([now, params.name, params.college, params.email, params.instagram, params.gender, params.looking_for, params.year_branch, params.interests, params.bio, '']);
-  return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
-}
-
-// (Optional) Basic CORS preflight support
-function doGet(){
-  return ContentService.createTextOutput('OK');
-}
-
-============================== -->
