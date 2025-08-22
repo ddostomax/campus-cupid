@@ -66,7 +66,7 @@
         <h2 class="text-3xl font-extrabold">Apply to get matched</h2>
         <p class="text-white/70 mt-2">Fill this quick form. You’ll be redirected to pay ₹49 (girls) or ₹99 (boys).</p>
 
-        <form id="applyForm" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form id="applyForm" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5" novalidate>
           <!-- LEFT -->
           <div class="space-y-4">
             <div>
@@ -81,7 +81,6 @@
               <label class="block text-sm text-white/80 mb-1">College Email</label>
               <input name="college_email" type="email" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="you@college.ac.in" />
             </div>
-            <!-- NEW personal email -->
             <div>
               <label class="block text-sm text-white/80 mb-1">Personal Email*</label>
               <input name="personal_email" type="email" required class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="you@gmail.com" />
@@ -107,12 +106,10 @@
                 <option>Open to all</option>
               </select>
             </div>
-            <!-- NEW Height -->
             <div>
               <label class="block text-sm text-white/80 mb-1">Height</label>
               <input name="height" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="e.g., 5'8 or 172cm" />
             </div>
-            <!-- Fun Hinge-style Q -->
             <div>
               <label class="block text-sm text-white/80 mb-1">Prompt: "My most controversial opinion is..."</label>
               <input name="prompt1" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="Type your answer" />
@@ -154,37 +151,63 @@
 
   <script>
     const CONFIG = {
-      MODE: "SIMPLE",
-      PAYMENT_LINK_FEMALE: "https://rzp.io/rzp/lctLABHF",  // ₹49 link for girls
-      PAYMENT_LINK_MALE: "https://rzp.io/rzp/93mRSD9",     // ₹99 link for boys
+      PAYMENT_LINK_FEMALE: "https://rzp.io/rzp/lctLABHF",   // ₹49 (girls)
+      PAYMENT_LINK_MALE:   "https://rzp.io/rzp/22etuR01",   // ₹99 (boys)
       FORM_ENDPOINT: "https://script.google.com/macros/s/AKfycbwTmWXqKR10d7yfTYcSSVNNgRwWDxF7NXokd9C41rE31IbPmn_FSeUqX1k7hd4FIr23/exec",
     };
 
     function formToObject(form){
-      const fd=new FormData(form); const obj={};
-      for(const [k,v] of fd.entries()){ obj[k]=v; }
+      const fd = new FormData(form); const obj = {};
+      for (const [k,v] of fd.entries()) obj[k] = v;
       return obj;
     }
 
     document.getElementById('yr').textContent = new Date().getFullYear();
+
     const form = document.getElementById('applyForm');
     const btn  = document.getElementById('submitBtn');
     const statusEl = document.getElementById('status');
 
     form.addEventListener('submit', (e)=> e.preventDefault());
-    btn.addEventListener('click', async ()=> {
-      if(!form.reportValidity()) return;
+
+    btn.addEventListener('click', async () => {
+      // Built-in validation
+      if (!form.reportValidity()) return;
+
       const data = formToObject(form);
-      btn.disabled=true; btn.textContent='Processing…';
-      try{
-        await fetch(CONFIG.FORM_ENDPOINT, { method:'POST', headers:{'Accept':'application/json'}, body:new FormData(form) });
-        let payLink = data.gender==="Female" ? CONFIG.PAYMENT_LINK_FEMALE : CONFIG.PAYMENT_LINK_MALE;
-        window.open(payLink, '_blank');
-        statusEl.textContent="Form submitted. Complete payment in the new tab.";
-        btn.textContent='Resend / Pay again';
-      }catch(err){
-        statusEl.textContent="Something went wrong.";
-        btn.disabled=false; btn.textContent="Pay & Submit";
+      const payLink = (data.gender === "Female")
+        ? CONFIG.PAYMENT_LINK_FEMALE
+        : CONFIG.PAYMENT_LINK_MALE;
+
+      if (!payLink) {
+        statusEl.textContent = "Please select a valid gender.";
+        return;
+      }
+
+      // Prepare UI
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = 'Processing…';
+      statusEl.textContent = "Submitting your form…";
+
+      // Open a tab immediately to avoid popup blockers, then navigate it after submit
+      const newTab = window.open('about:blank', '_blank');
+
+      try {
+        await fetch(CONFIG.FORM_ENDPOINT, {
+          method: 'POST',
+          body: new FormData(form),
+          mode: 'no-cors' // prevents CORS errors with Apps Script; we won't read the response
+        });
+
+        statusEl.textContent = "Form submitted. Complete payment in the new tab.";
+      } catch (err) {
+        statusEl.textContent = "Form submission may have failed, but you can still complete payment.";
+      } finally {
+        // Navigate the pre-opened tab to Razorpay link
+        if (newTab) newTab.location.href = payLink;
+        btn.disabled = false;
+        btn.textContent = 'Resend / Pay again';
       }
     });
   </script>
