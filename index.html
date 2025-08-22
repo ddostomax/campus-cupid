@@ -199,144 +199,105 @@
     </div>
   </div>
 
-  <script>
-    // ---------- CONFIG ----------
-    const CONFIG = {
-      PAYMENT_LINK_FEMALE: "https://rzp.io/rzp/lctLABHF",   // ₹49 (girls)
-      PAYMENT_LINK_MALE:   "https://rzp.io/rzp/22etuR01",   // ₹99 (boys)
-      FORM_ENDPOINT: "https://script.google.com/macros/s/AKfycbwTmWXqKR10d7yfTYcSSVNNgRwWDxF7NXokd9C41rE31IbPmn_FSeUqX1k7hd4FIr23/exec",
-      UPI_ID: "7982609677@okbizaxis",
-      PHONE: "+91 79826 09677",
-      MERCHANT_NAME: "Campus Cupid"
-    };
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  // ---------- CONFIG ----------
+  const CONFIG = {
+    API_BASE: "https://your-backend.onrender.com",  // change to your Render/Vercel URL
+    GSHEET_ENDPOINT: "https://script.google.com/macros/s/AKfycbwTmWXqKR10d7yfTYcSSVNNgRwWDxF7NXokd9C41rE31IbPmn_FSeUqX1k7hd4FIr23/exec",
+    MERCHANT_NAME: "Campus Cupid"
+  };
 
-    // ---------- UTIL ----------
-    function formToObject(form){
-      const fd = new FormData(form); const obj = {};
-      for (const [k,v] of fd.entries()) obj[k] = v;
-      return obj;
-    }
+  function formToObject(form){
+    const fd = new FormData(form);
+    return Object.fromEntries(fd.entries());
+  }
 
-    // ---------- DOM ----------
-    document.getElementById('yr').textContent = new Date().getFullYear();
-    const form = document.getElementById('applyForm');
-    const btn  = document.getElementById('submitBtn');
-    const statusEl = document.getElementById('status');
-    const qrModal = document.getElementById('qrModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const payViaRzpBtn = document.getElementById('payViaRzpBtn');
-    const openInNewTabBtn = document.getElementById('openInNewTabBtn');
-    const modalStatus = document.getElementById('modalStatus');
-    const copyUpiBtn = document.getElementById('copyUpiBtn');
-    const paidUpiBtn = document.getElementById('paidUpiBtn');
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  const form = document.getElementById('applyForm');
+  const btn  = document.getElementById('submitBtn');
+  const statusEl = document.getElementById('status');
+  const qrModal = document.getElementById('qrModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const payViaRzpBtn = document.getElementById('payViaRzpBtn');
+  const modalStatus = document.getElementById('modalStatus');
 
-    // prevent native submit
-    form.addEventListener('submit', (e)=> e.preventDefault());
+  form.addEventListener('submit', (e)=> e.preventDefault());
 
-    // keep reference to a pre-opened tab (avoids popup blockers)
-    let preopenedTab = null;
+  btn.addEventListener('click', async () => {
+    if (!form.reportValidity()) return;
 
-    btn.addEventListener('click', async () => {
-      // validation
-      if (!form.reportValidity()) return;
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Processing…';
+    statusEl.textContent = "Creating payment order…";
 
-      // prepare
-      btn.disabled = true;
-      const originalText = btn.textContent;
-      btn.textContent = 'Processing…';
-      statusEl.textContent = "Submitting your form…";
+    const data = formToObject(form);
 
-      const data = formToObject(form);
-      const payLink = (data.gender === "Female") ? CONFIG.PAYMENT_LINK_FEMALE : CONFIG.PAYMENT_LINK_MALE;
+    try {
+      // 1. Create order via backend
+      const resp = await fetch(`${CONFIG.API_BASE}/api/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!resp.ok) throw new Error("order_failed");
+      const { key, orderId, amount, currency } = await resp.json();
 
-      // pre-open tab right away if a payLink exists (so later navigation won't be blocked)
-      if (payLink) {
-        try {
-          preopenedTab = window.open('about:blank', '_blank');
-        } catch (err) {
-          preopenedTab = null;
+      // 2. Open Razorpay Checkout
+      const rzp = new Razorpay({
+        key,
+        order_id: orderId,
+        amount,
+        currency,
+        name: CONFIG.MERCHANT_NAME,
+        description: "Campus Cupid Application",
+        prefill: {
+          name: data.name,
+          email: data.personal_email,
+          contact: data.phone || ""
+        },
+        theme: { color: "#ec4899" },
+        handler: async function (response) {
+          modalStatus.textContent = "Verifying payment…";
+
+          // 3. Verify payment on the backend
+          const verifyResp = await fetch(`${CONFIG.API_BASE}/api/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              formData: data
+            }),
+          });
+          const result = await verifyResp.json();
+
+          if (verifyResp.ok && result.ok) {
+            modalStatus.textContent = "✅ Payment verified & form saved!";
+            setTimeout(()=> qrModal.classList.add('hidden'), 1200);
+          } else {
+            modalStatus.textContent = "⚠ Payment verification failed.";
+          }
         }
-      }
+      });
+      rzp.open();
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = "Could not start Razorpay. Try again.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
 
-      // submit to Apps Script (no-cors — we won't read response)
-      try {
-        await fetch(CONFIG.FORM_ENDPOINT, {
-          method: 'POST',
-          body: new FormData(form),
-          mode: 'no-cors'
-        });
-        statusEl.textContent = "Form submitted. Choose your payment method below.";
-      } catch (err) {
-        statusEl.textContent = "Form submission may have failed, but you can still pay using the options below.";
-      } finally {
-        // Restore button state
-        btn.disabled = false;
-        btn.textContent = originalText;
+  // close modal button
+  closeModalBtn.addEventListener('click', () => {
+    qrModal.classList.add('hidden');
+  });
+</script>
 
-        // Populate modal controls
-        document.getElementById('upiIdText').textContent = CONFIG.UPI_ID;
-        payViaRzpBtn.dataset.paylink = payLink || "";
-        modalStatus.textContent = (payLink) ? `Suggested payment: ${data.gender === 'Female' ? '₹49' : '₹99'}` : 'Payment link not available — use QR/UPI.';
-        // show modal
-        qrModal.classList.remove('hidden');
-      }
-    });
-
-    // modal interactions
-    closeModalBtn.addEventListener('click', () => {
-      qrModal.classList.add('hidden');
-    });
-
-    // "Pay via Razorpay" - navigate the preopened tab (or open a new one)
-    payViaRzpBtn.addEventListener('click', () => {
-      const paylink = payViaRzpBtn.dataset.paylink;
-      if (!paylink) {
-        modalStatus.textContent = 'Payment link not available (choose UPI).';
-        return;
-      }
-      if (preopenedTab && !preopenedTab.closed) {
-        preopenedTab.location.href = paylink;
-        preopenedTab.focus();
-      } else {
-        window.open(paylink, '_blank');
-      }
-      modalStatus.textContent = 'Razorpay opened in new tab.';
-    });
-
-    // alternative open button (in case user accidentally closed the preopened tab)
-    openInNewTabBtn.addEventListener('click', () => {
-      const paylink = payViaRzpBtn.dataset.paylink;
-      if (!paylink) {
-        modalStatus.textContent = 'Payment link not configured.';
-        return;
-      }
-      window.open(paylink, '_blank');
-    });
-
-    // copy UPI ID
-    copyUpiBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(CONFIG.UPI_ID);
-        copyUpiBtn.textContent = 'Copied!';
-        setTimeout(()=> copyUpiBtn.textContent = 'Copy UPI ID', 1500);
-      } catch (err) {
-        copyUpiBtn.textContent = 'Copy failed';
-        setTimeout(()=> copyUpiBtn.textContent = 'Copy UPI ID', 1500);
-      }
-    });
-
-    // user confirms they paid via UPI
-    paidUpiBtn.addEventListener('click', () => {
-      modalStatus.textContent = 'Thanks — payment noted. We will verify and contact you.';
-      // optionally close modal after a short delay
-      setTimeout(()=> qrModal.classList.add('hidden'), 1200);
-    });
-
-    // close modal when clicking outside the card
-    qrModal.addEventListener('click', (e) => {
-      if (e.target === qrModal) qrModal.classList.add('hidden');
-    });
-  </script>
 
 </body>
 </html>
