@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Campus Cupid ❤️ Find Your Campus Match</title>
   <meta name="description" content="College matchmaking done right. Smart forms, verified students, secure payments." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,18 +11,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{ --ring: 0 0 0 4px rgba(236,72,153,.25);} 
-    html,body{font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    .glass{ backdrop-filter: blur(8px); background: rgba(255,255,255,.04); }
+    html,body{font-family: Inter, system-ui;}
+    .glass{ backdrop-filter: blur(8px); background: rgba(255,255,255,.08); }
     .hero-grad{
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(236,72,153,.12), transparent),
-                  radial-gradient(900px 500px at 100% 0%, rgba(147,51,234,.07), transparent),
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(236,72,153,.25), transparent),
+                  radial-gradient(900px 500px at 100% 0%, rgba(147,51,234,.18), transparent),
                   linear-gradient(180deg, #0b0b12 0%, #0e0e16 100%);
     }
     .card{ box-shadow: 0 10px 30px rgba(0,0,0,.25); }
     .cta:hover{ transform: translateY(-1px); }
     .ring-focus:focus{ outline: none; box-shadow: var(--ring); }
-    /* simple modal utilities */
-    .modal-backdrop { background: rgba(0,0,0,0.7); }
   </style>
 </head>
 <body class="bg-[#0e0e16] text-white">
@@ -53,15 +51,9 @@
         <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
           Find your campus match in days, not months.
         </h1>
-        <p class="mt-4 text-white/80 text-lg">Verified students • Privacy-first • Smart matching across colleges. Girls pay ₹49, Boys pay ₹99.</p>
+        <p class="mt-4 text-white/80 text-lg">Verified students • Privacy-first • Smart matching across colleges. Girls pay ₹49, Boys pay ₹99. </p>
         <div class="mt-6 flex gap-3">
           <a href="#apply" class="cta inline-block rounded-2xl bg-pink-600 px-5 py-3 font-semibold shadow-xl">Apply now</a>
-        </div>
-      </div>
-      <div class="hidden md:block">
-        <!-- placeholder for image/illustration -->
-        <div class="rounded-2xl p-6 glass card border border-white/5">
-          <p class="text-white/70">Upload a hero illustration here if you want.</p>
         </div>
       </div>
     </div>
@@ -72,7 +64,7 @@
     <div class="max-w-4xl mx-auto px-4 py-16">
       <div class="glass card rounded-3xl p-6 md:p-10 border border-white/10">
         <h2 class="text-3xl font-extrabold">Apply to get matched</h2>
-        <p class="text-white/70 mt-2">Fill this quick form. You’ll be prompted to pay — choose UPI or Razorpay.</p>
+        <p class="text-white/70 mt-2">Fill this quick form. You’ll be redirected to pay ₹49 (girls) or ₹99 (boys).</p>
 
         <form id="applyForm" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5" novalidate>
           <!-- LEFT -->
@@ -135,7 +127,7 @@
           </div>
 
           <div class="md:col-span-2 flex flex-col sm:flex-row gap-3">
-            <button id="submitBtn" type="button" class="cta w-full sm:w-auto rounded-2xl bg-pink-600 px-6 py-3 font-semibold shadow-xl">
+            <button id="submitBtn" class="cta w-full sm:w-auto rounded-2xl bg-pink-600 px-6 py-3 font-semibold shadow-xl disabled:opacity-60 disabled:cursor-not-allowed">
               Pay & Submit
             </button>
             <p id="status" class="text-white/70 text-sm flex-1"></p>
@@ -157,147 +149,67 @@
     </div>
   </footer>
 
-  <!-- PAYMENT / QR MODAL -->
-  <div id="qrModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 mx-4 text-black">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h3 class="text-xl font-semibold">Scan to pay (UPI)</h3>
-          <p class="text-sm text-gray-600">Scan the QR or use the UPI ID below.</p>
-        </div>
-        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700" title="Close">&times;</button>
-      </div>
+  <script>
+    const CONFIG = {
+      PAYMENT_LINK_FEMALE: "https://rzp.io/rzp/lctLABHF",   // ₹49 (girls)
+      PAYMENT_LINK_MALE:   "https://rzp.io/rzp/22etuR01",   // ₹99 (boys)
+      FORM_ENDPOINT: "https://script.google.com/macros/s/AKfycbwTmWXqKR10d7yfTYcSSVNNgRwWDxF7NXokd9C41rE31IbPmn_FSeUqX1k7hd4FIr23/exec",
+    };
 
-      <div class="mt-4 flex flex-col items-center">
-        <!-- Replace qr.jpg with your real file in the same folder -->
-        <img src="qr.jpg" alt="Campus Cupid UPI QR" class="w-56 h-auto rounded-lg border border-gray-200 shadow-sm" id="qrImage">
-
-        <div class="mt-4 text-center">
-          <div class="text-sm text-gray-700">Campus Cupid</div>
-          <div class="font-medium mt-1" id="upiIdText">7982609677@okbizaxis</div>
-          <div class="text-sm text-gray-600 mt-1">+91 79826 09677</div>
-        </div>
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button id="copyUpiBtn" class="px-4 py-2 rounded-full bg-gray-100 text-black text-sm">Copy UPI ID</button>
-          <a id="downloadQR" href="qr.jpg" download class="px-4 py-2 rounded-full bg-gray-100 text-black text-sm">Download QR</a>
-          <button id="paidUpiBtn" class="px-4 py-2 rounded-full bg-green-600 text-white text-sm">I paid via UPI</button>
-        </div>
-
-        <div class="mt-4 w-full">
-          <div class="border-t border-gray-200 pt-4">
-            <p class="text-sm text-gray-700">Prefer to pay with card/netbanking? Use Razorpay:</p>
-            <div class="mt-3 flex gap-2">
-              <button id="payViaRzpBtn" data-paylink="" class="flex-1 px-4 py-2 rounded-2xl bg-pink-600 text-white font-semibold">Pay via Razorpay</button>
-              <button id="openInNewTabBtn" class="px-4 py-2 rounded-2xl border border-gray-200 text-black bg-white">Open</button>
-            </div>
-            <p id="modalStatus" class="text-sm text-gray-500 mt-2"></p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-  // ---------- CONFIG ----------
-  const CONFIG = {
-    API_BASE: "https://your-backend.onrender.com",  // change to your Render/Vercel URL
-    GSHEET_ENDPOINT: "https://script.google.com/macros/s/AKfycbwTmWXqKR10d7yfTYcSSVNNgRwWDxF7NXokd9C41rE31IbPmn_FSeUqX1k7hd4FIr23/exec",
-    MERCHANT_NAME: "Campus Cupid"
-  };
-
-  function formToObject(form){
-    const fd = new FormData(form);
-    return Object.fromEntries(fd.entries());
-  }
-
-  document.getElementById('yr').textContent = new Date().getFullYear();
-  const form = document.getElementById('applyForm');
-  const btn  = document.getElementById('submitBtn');
-  const statusEl = document.getElementById('status');
-  const qrModal = document.getElementById('qrModal');
-  const closeModalBtn = document.getElementById('closeModalBtn');
-  const payViaRzpBtn = document.getElementById('payViaRzpBtn');
-  const modalStatus = document.getElementById('modalStatus');
-
-  form.addEventListener('submit', (e)=> e.preventDefault());
-
-  btn.addEventListener('click', async () => {
-    if (!form.reportValidity()) return;
-
-    btn.disabled = true;
-    const originalText = btn.textContent;
-    btn.textContent = 'Processing…';
-    statusEl.textContent = "Creating payment order…";
-
-    const data = formToObject(form);
-
-    try {
-      // 1. Create order via backend
-      const resp = await fetch(`${CONFIG.API_BASE}/api/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!resp.ok) throw new Error("order_failed");
-      const { key, orderId, amount, currency } = await resp.json();
-
-      // 2. Open Razorpay Checkout
-      const rzp = new Razorpay({
-        key,
-        order_id: orderId,
-        amount,
-        currency,
-        name: CONFIG.MERCHANT_NAME,
-        description: "Campus Cupid Application",
-        prefill: {
-          name: data.name,
-          email: data.personal_email,
-          contact: data.phone || ""
-        },
-        theme: { color: "#ec4899" },
-        handler: async function (response) {
-          modalStatus.textContent = "Verifying payment…";
-
-          // 3. Verify payment on the backend
-          const verifyResp = await fetch(`${CONFIG.API_BASE}/api/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-              formData: data
-            }),
-          });
-          const result = await verifyResp.json();
-
-          if (verifyResp.ok && result.ok) {
-            modalStatus.textContent = "✅ Payment verified & form saved!";
-            setTimeout(()=> qrModal.classList.add('hidden'), 1200);
-          } else {
-            modalStatus.textContent = "⚠ Payment verification failed.";
-          }
-        }
-      });
-      rzp.open();
-    } catch (err) {
-      console.error(err);
-      statusEl.textContent = "Could not start Razorpay. Try again.";
-    } finally {
-      btn.disabled = false;
-      btn.textContent = originalText;
+    function formToObject(form){
+      const fd = new FormData(form); const obj = {};
+      for (const [k,v] of fd.entries()) obj[k] = v;
+      return obj;
     }
-  });
 
-  // close modal button
-  closeModalBtn.addEventListener('click', () => {
-    qrModal.classList.add('hidden');
-  });
-</script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
 
+    const form = document.getElementById('applyForm');
+    const btn  = document.getElementById('submitBtn');
+    const statusEl = document.getElementById('status');
 
+    form.addEventListener('submit', (e)=> e.preventDefault());
+
+    btn.addEventListener('click', async () => {
+      // Built-in validation
+      if (!form.reportValidity()) return;
+
+      const data = formToObject(form);
+      const payLink = (data.gender === "Female")
+        ? CONFIG.PAYMENT_LINK_FEMALE
+        : CONFIG.PAYMENT_LINK_MALE;
+
+      if (!payLink) {
+        statusEl.textContent = "Please select a valid gender.";
+        return;
+      }
+
+      // Prepare UI
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = 'Processing…';
+      statusEl.textContent = "Submitting your form…";
+
+      // Open a tab immediately to avoid popup blockers, then navigate it after submit
+      const newTab = window.open('about:blank', '_blank');
+
+      try {
+        await fetch(CONFIG.FORM_ENDPOINT, {
+          method: 'POST',
+          body: new FormData(form),
+          mode: 'no-cors' // prevents CORS errors with Apps Script; we won't read the response
+        });
+
+        statusEl.textContent = "Form submitted. Complete payment in the new tab.";
+      } catch (err) {
+        statusEl.textContent = "Form submission may have failed, but you can still complete payment.";
+      } finally {
+        // Navigate the pre-opened tab to Razorpay link
+        if (newTab) newTab.location.href = payLink;
+        btn.disabled = false;
+        btn.textContent = 'Resend / Pay again';
+      }
+    });
+  </script>
 </body>
 </html>
