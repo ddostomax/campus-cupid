@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Campus Cupid ❤️ Find Your Campus Match</title>
   <meta name="description" content="College matchmaking done right. Smart forms, verified students, secure payments." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,18 +11,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{ --ring: 0 0 0 4px rgba(236,72,153,.25);} 
-    html,body{font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    .glass{ backdrop-filter: blur(8px); background: rgba(255,255,255,.04); }
+    html,body{font-family: Inter, system-ui;}
+    .glass{ backdrop-filter: blur(8px); background: rgba(255,255,255,.08); }
     .hero-grad{
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(236,72,153,.12), transparent),
-                  radial-gradient(900px 500px at 100% 0%, rgba(147,51,234,.07), transparent),
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(236,72,153,.25), transparent),
+                  radial-gradient(900px 500px at 100% 0%, rgba(147,51,234,.18), transparent),
                   linear-gradient(180deg, #0b0b12 0%, #0e0e16 100%);
     }
     .card{ box-shadow: 0 10px 30px rgba(0,0,0,.25); }
     .cta:hover{ transform: translateY(-1px); }
     .ring-focus:focus{ outline: none; box-shadow: var(--ring); }
-    /* simple modal utilities */
-    .modal-backdrop { background: rgba(0,0,0,0.7); }
   </style>
 </head>
 <body class="bg-[#0e0e16] text-white">
@@ -53,15 +51,9 @@
         <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
           Find your campus match in days, not months.
         </h1>
-        <p class="mt-4 text-white/80 text-lg">Verified students • Privacy-first • Smart matching across colleges. Girls pay ₹49, Boys pay ₹99.</p>
+        <p class="mt-4 text-white/80 text-lg">Verified students • Privacy-first • Smart matching across colleges. Girls pay ₹49, Boys pay ₹99. </p>
         <div class="mt-6 flex gap-3">
           <a href="#apply" class="cta inline-block rounded-2xl bg-pink-600 px-5 py-3 font-semibold shadow-xl">Apply now</a>
-        </div>
-      </div>
-      <div class="hidden md:block">
-        <!-- placeholder for image/illustration -->
-        <div class="rounded-2xl p-6 glass card border border-white/5">
-          <p class="text-white/70">Upload a hero illustration here if you want.</p>
         </div>
       </div>
     </div>
@@ -72,9 +64,9 @@
     <div class="max-w-4xl mx-auto px-4 py-16">
       <div class="glass card rounded-3xl p-6 md:p-10 border border-white/10">
         <h2 class="text-3xl font-extrabold">Apply to get matched</h2>
-        <p class="text-white/70 mt-2">Fill this quick form. You’ll be prompted to pay — choose UPI or Razorpay.</p>
+        <p class="text-white/70 mt-2">Fill this quick form. You’ll be redirected to pay ₹49 (girls) or ₹99 (boys).</p>
 
-        <form id="applyForm" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5" novalidate>
+        <form id="applyForm" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
           <!-- LEFT -->
           <div class="space-y-4">
             <div>
@@ -89,6 +81,7 @@
               <label class="block text-sm text-white/80 mb-1">College Email</label>
               <input name="college_email" type="email" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="you@college.ac.in" />
             </div>
+            <!-- NEW personal email -->
             <div>
               <label class="block text-sm text-white/80 mb-1">Personal Email*</label>
               <input name="personal_email" type="email" required class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="you@gmail.com" />
@@ -114,10 +107,12 @@
                 <option>Open to all</option>
               </select>
             </div>
+            <!-- NEW Height -->
             <div>
               <label class="block text-sm text-white/80 mb-1">Height</label>
               <input name="height" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="e.g., 5'8 or 172cm" />
             </div>
+            <!-- Fun Hinge-style Q -->
             <div>
               <label class="block text-sm text-white/80 mb-1">Prompt: "My most controversial opinion is..."</label>
               <input name="prompt1" class="w-full ring-focus rounded-2xl bg-white/5 border px-4 py-3" placeholder="Type your answer" />
@@ -135,7 +130,7 @@
           </div>
 
           <div class="md:col-span-2 flex flex-col sm:flex-row gap-3">
-            <button id="submitBtn" type="button" class="cta w-full sm:w-auto rounded-2xl bg-pink-600 px-6 py-3 font-semibold shadow-xl">
+            <button id="submitBtn" class="cta w-full sm:w-auto rounded-2xl bg-pink-600 px-6 py-3 font-semibold shadow-xl disabled:opacity-60 disabled:cursor-not-allowed">
               Pay & Submit
             </button>
             <p id="status" class="text-white/70 text-sm flex-1"></p>
@@ -157,186 +152,41 @@
     </div>
   </footer>
 
-  <!-- PAYMENT / QR MODAL -->
-  <div id="qrModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 mx-4 text-black">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h3 class="text-xl font-semibold">Scan to pay (UPI)</h3>
-          <p class="text-sm text-gray-600">Scan the QR or use the UPI ID below.</p>
-        </div>
-        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700" title="Close">&times;</button>
-      </div>
-
-      <div class="mt-4 flex flex-col items-center">
-        <!-- Replace qr.jpg with your real file in the same folder -->
-        <img src="qr.jpg" alt="Campus Cupid UPI QR" class="w-56 h-auto rounded-lg border border-gray-200 shadow-sm" id="qrImage">
-
-        <div class="mt-4 text-center">
-          <div class="text-sm text-gray-700">Campus Cupid</div>
-          <div class="font-medium mt-1" id="upiIdText">7982609677@okbizaxis</div>
-          <div class="text-sm text-gray-600 mt-1">+91 79826 09677</div>
-        </div>
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button id="copyUpiBtn" class="px-4 py-2 rounded-full bg-gray-100 text-black text-sm">Copy UPI ID</button>
-          <a id="downloadQR" href="qr.jpg" download class="px-4 py-2 rounded-full bg-gray-100 text-black text-sm">Download QR</a>
-          <button id="paidUpiBtn" class="px-4 py-2 rounded-full bg-green-600 text-white text-sm">I paid via UPI</button>
-        </div>
-
-        <div class="mt-4 w-full">
-          <div class="border-t border-gray-200 pt-4">
-            <p class="text-sm text-gray-700">Prefer to pay with card/netbanking? Use Razorpay:</p>
-            <div class="mt-3 flex gap-2">
-              <button id="payViaRzpBtn" data-paylink="" class="flex-1 px-4 py-2 rounded-2xl bg-pink-600 text-white font-semibold">Pay via Razorpay</button>
-              <button id="openInNewTabBtn" class="px-4 py-2 rounded-2xl border border-gray-200 text-black bg-white">Open</button>
-            </div>
-            <p id="modalStatus" class="text-sm text-gray-500 mt-2"></p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
   <script>
-    // ---------- CONFIG ----------
     const CONFIG = {
-      PAYMENT_LINK_FEMALE: "https://rzp.io/rzp/lctLABHF",   // ₹49 (girls)
-      PAYMENT_LINK_MALE:   "https://rzp.io/rzp/22etuR01",   // ₹99 (boys)
+      MODE: "SIMPLE",
+      PAYMENT_LINK_FEMALE: "https://rzp.io/rzp/lctLABHF",  // ₹49 link for girls
+      PAYMENT_LINK_MALE: "https://rzp.io/rzp/93mRSD9",     // ₹99 link for boys
       FORM_ENDPOINT: "https://script.google.com/macros/s/AKfycbwTmWXqKR10d7yfTYcSSVNNgRwWDxF7NXokd9C41rE31IbPmn_FSeUqX1k7hd4FIr23/exec",
-      UPI_ID: "7982609677@okbizaxis",
-      PHONE: "+91 79826 09677",
-      MERCHANT_NAME: "Campus Cupid"
     };
 
-    // ---------- UTIL ----------
     function formToObject(form){
-      const fd = new FormData(form); const obj = {};
-      for (const [k,v] of fd.entries()) obj[k] = v;
+      const fd=new FormData(form); const obj={};
+      for(const [k,v] of fd.entries()){ obj[k]=v; }
       return obj;
     }
 
-    // ---------- DOM ----------
     document.getElementById('yr').textContent = new Date().getFullYear();
     const form = document.getElementById('applyForm');
     const btn  = document.getElementById('submitBtn');
     const statusEl = document.getElementById('status');
-    const qrModal = document.getElementById('qrModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const payViaRzpBtn = document.getElementById('payViaRzpBtn');
-    const openInNewTabBtn = document.getElementById('openInNewTabBtn');
-    const modalStatus = document.getElementById('modalStatus');
-    const copyUpiBtn = document.getElementById('copyUpiBtn');
-    const paidUpiBtn = document.getElementById('paidUpiBtn');
 
-    // prevent native submit
     form.addEventListener('submit', (e)=> e.preventDefault());
-
-    // keep reference to a pre-opened tab (avoids popup blockers)
-    let preopenedTab = null;
-
-    btn.addEventListener('click', async () => {
-      // validation
-      if (!form.reportValidity()) return;
-
-      // prepare
-      btn.disabled = true;
-      const originalText = btn.textContent;
-      btn.textContent = 'Processing…';
-      statusEl.textContent = "Submitting your form…";
-
+    btn.addEventListener('click', async ()=> {
+      if(!form.reportValidity()) return;
       const data = formToObject(form);
-      const payLink = (data.gender === "Female") ? CONFIG.PAYMENT_LINK_FEMALE : CONFIG.PAYMENT_LINK_MALE;
-
-      // pre-open tab right away if a payLink exists (so later navigation won't be blocked)
-      if (payLink) {
-        try {
-          preopenedTab = window.open('about:blank', '_blank');
-        } catch (err) {
-          preopenedTab = null;
-        }
+      btn.disabled=true; btn.textContent='Processing…';
+      try{
+        await fetch(CONFIG.FORM_ENDPOINT, { method:'POST', headers:{'Accept':'application/json'}, body:new FormData(form) });
+        let payLink = data.gender==="Female" ? CONFIG.PAYMENT_LINK_FEMALE : CONFIG.PAYMENT_LINK_MALE;
+        window.open(payLink, '_blank');
+        statusEl.textContent="Form submitted. Complete payment in the new tab.";
+        btn.textContent='Resend / Pay again';
+      }catch(err){
+        statusEl.textContent="Something went wrong.";
+        btn.disabled=false; btn.textContent="Pay & Submit";
       }
-
-      // submit to Apps Script (no-cors — we won't read response)
-      try {
-        await fetch(CONFIG.FORM_ENDPOINT, {
-          method: 'POST',
-          body: new FormData(form),
-          mode: 'no-cors'
-        });
-        statusEl.textContent = "Form submitted. Choose your payment method below.";
-      } catch (err) {
-        statusEl.textContent = "Form submission may have failed, but you can still pay using the options below.";
-      } finally {
-        // Restore button state
-        btn.disabled = false;
-        btn.textContent = originalText;
-
-        // Populate modal controls
-        document.getElementById('upiIdText').textContent = CONFIG.UPI_ID;
-        payViaRzpBtn.dataset.paylink = payLink || "";
-        modalStatus.textContent = (payLink) ? `Suggested payment: ${data.gender === 'Female' ? '₹49' : '₹99'}` : 'Payment link not available — use QR/UPI.';
-        // show modal
-        qrModal.classList.remove('hidden');
-      }
-    });
-
-    // modal interactions
-    closeModalBtn.addEventListener('click', () => {
-      qrModal.classList.add('hidden');
-    });
-
-    // "Pay via Razorpay" - navigate the preopened tab (or open a new one)
-    payViaRzpBtn.addEventListener('click', () => {
-      const paylink = payViaRzpBtn.dataset.paylink;
-      if (!paylink) {
-        modalStatus.textContent = 'Payment link not available (choose UPI).';
-        return;
-      }
-      if (preopenedTab && !preopenedTab.closed) {
-        preopenedTab.location.href = paylink;
-        preopenedTab.focus();
-      } else {
-        window.open(paylink, '_blank');
-      }
-      modalStatus.textContent = 'Razorpay opened in new tab.';
-    });
-
-    // alternative open button (in case user accidentally closed the preopened tab)
-    openInNewTabBtn.addEventListener('click', () => {
-      const paylink = payViaRzpBtn.dataset.paylink;
-      if (!paylink) {
-        modalStatus.textContent = 'Payment link not configured.';
-        return;
-      }
-      window.open(paylink, '_blank');
-    });
-
-    // copy UPI ID
-    copyUpiBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(CONFIG.UPI_ID);
-        copyUpiBtn.textContent = 'Copied!';
-        setTimeout(()=> copyUpiBtn.textContent = 'Copy UPI ID', 1500);
-      } catch (err) {
-        copyUpiBtn.textContent = 'Copy failed';
-        setTimeout(()=> copyUpiBtn.textContent = 'Copy UPI ID', 1500);
-      }
-    });
-
-    // user confirms they paid via UPI
-    paidUpiBtn.addEventListener('click', () => {
-      modalStatus.textContent = 'Thanks — payment noted. We will verify and contact you.';
-      // optionally close modal after a short delay
-      setTimeout(()=> qrModal.classList.add('hidden'), 1200);
-    });
-
-    // close modal when clicking outside the card
-    qrModal.addEventListener('click', (e) => {
-      if (e.target === qrModal) qrModal.classList.add('hidden');
     });
   </script>
-
 </body>
 </html>
